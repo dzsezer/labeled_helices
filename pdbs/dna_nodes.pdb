@@ -1,0 +1,291 @@
+ATOM      1  S   GUA     1       0.000   0.000   0.000  1.00  1.00      DNAx
+ATOM      2  C   GUA     1      -2.477   5.399   0.000  1.00  1.00      DNAx
+ATOM      3  C   GUA     1      -2.477  -5.402  -0.000  1.00  1.00      DNAx
+ATOM      4  S   THY     2      -0.126   0.475   3.360  1.00  1.00      DNAx
+ATOM      5  C   THY     2      -5.320   3.274   3.479  1.00  1.00      DNAx
+ATOM      6  C   THY     2       1.094  -5.290   3.382  1.00  1.00      DNAx
+ATOM      7  S    C_     3      -0.397   0.858   6.734  1.00  1.00      DNAx
+ATOM      8  C    C_     3      -6.266  -0.026   7.032  1.00  1.00      DNAx
+ATOM      9  C    C_     3       4.107  -3.014   6.663  1.00  1.00      DNAx
+ATOM     10  S   ADE     4      -0.684   0.972  10.099  1.00  1.00      DNAx
+ATOM     11  C   ADE     4      -4.914  -3.107  10.551  1.00  1.00      DNAx
+ATOM     12  C   ADE     4       5.182   0.374   9.875  1.00  1.00      DNAx
+ATOM     13  S   GUA     5      -0.919   1.002  13.467  1.00  1.00      DNAx
+ATOM     14  C   GUA     5      -2.084  -4.798  14.010  1.00  1.00      DNAx
+ATOM     15  C   GUA     5       4.256   3.896  13.072  1.00  1.00      DNAx
+ATOM     16  S   THY     6      -1.005   0.840  16.858  1.00  1.00      DNAx
+ATOM     17  C   THY     6       1.557  -4.450  17.375  1.00  1.00      DNAx
+ATOM     18  C   THY     6       1.392   6.199  16.343  1.00  1.00      DNAx
+ATOM     19  S   CYT     7      -0.921   0.670  20.260  1.00  1.00      DNAx
+ATOM     20  C   CYT     7       4.355  -2.037  20.654  1.00  1.00      DNAx
+ATOM     21  C   CYT     7      -2.293   6.424  19.717  1.00  1.00      DNAx
+ATOM     22  S   GUA     8      -0.714   0.685  23.618  1.00  1.00      DNAx
+ATOM     23  C   GUA     8       5.180   1.387  23.853  1.00  1.00      DNAx
+ATOM     24  C   GUA     8      -5.080   4.690  23.162  1.00  1.00      DNAx
+ATOM     25  S   CYT     9      -0.333   0.856  27.016  1.00  1.00      DNAx
+ATOM     26  C   CYT     9       3.887   5.040  27.077  1.00  1.00      DNAx
+ATOM     27  C   CYT     9      -6.248   1.321  26.724  1.00  1.00      DNAx
+ATOM     28  S   GUA    10      -0.132   1.172  30.360  1.00  1.00      DNAx
+ATOM     29  C   GUA    10       1.033   6.996  30.343  1.00  1.00      DNAx
+ATOM     30  C   GUA    10      -5.307  -1.747  30.237  1.00  1.00      DNAx
+ATOM     31  S   CYT    11      -0.023   1.703  33.740  1.00  1.00      DNAx
+ATOM     32  C   CYT    11      -2.691   7.013  33.740  1.00  1.00      DNAx
+ATOM     33  C   CYT    11      -2.306  -3.781  33.739  1.00  1.00      DNAx
+ATOM     34  S   GUA    12      -0.110   2.106  37.079  1.00  1.00      DNAx
+ATOM     35  C   GUA    12      -5.284   5.022  37.196  1.00  1.00      DNAx
+ATOM     36  C   GUA    12       1.058  -3.720  37.103  1.00  1.00      DNAx
+ATOM     37  S   CYT    13      -0.428   2.490  40.466  1.00  1.00      DNAx
+ATOM     38  C   CYT    13      -6.297   1.606  40.762  1.00  1.00      DNAx
+ATOM     39  C   CYT    13       4.076  -1.382  40.394  1.00  1.00      DNAx
+ATOM     40  S   GUA    14      -0.687   2.648  43.817  1.00  1.00      DNAx
+ATOM     41  C   GUA    14      -5.051  -1.357  44.269  1.00  1.00      DNAx
+ATOM     42  C   GUA    14       5.210   1.948  43.597  1.00  1.00      DNAx
+ATOM     43  S   CYT    15      -0.997   2.581  47.225  1.00  1.00      DNAx
+ATOM     44  C   CYT    15      -1.957  -3.259  47.765  1.00  1.00      DNAx
+ATOM     45  C   CYT    15       4.070   5.654  46.818  1.00  1.00      DNAx
+ATOM     46  S   GUA    16      -1.075   2.498  50.588  1.00  1.00      DNAx
+ATOM     47  C   GUA    16       1.401  -2.876  51.113  1.00  1.00      DNAx
+ATOM     48  C   GUA    16       1.402   7.875  50.072  1.00  1.00      DNAx
+ATOM     49  S   CYT    17      -0.953   2.299  54.003  1.00  1.00      DNAx
+ATOM     50  C   CYT    17       4.322  -0.408  54.398  1.00  1.00      DNAx
+ATOM     51  C   CYT    17      -2.325   8.053  53.461  1.00  1.00      DNAx
+ATOM     52  S   ADE    18      -0.697   2.334  57.372  1.00  1.00      DNAx
+ATOM     53  C   ADE    18       5.131   3.174  57.595  1.00  1.00      DNAx
+ATOM     54  C   ADE    18      -5.098   6.240  56.921  1.00  1.00      DNAx
+ATOM     55  S   THY    19      -0.414   2.502  60.735  1.00  1.00      DNAx
+ATOM     56  C   THY    19       3.842   6.588  60.800  1.00  1.00      DNAx
+ATOM     57  C   THY    19      -6.269   3.106  60.443  1.00  1.00      DNAx
+ATOM     58  S   CYT    20      -0.126   2.852  64.112  1.00  1.00      DNAx
+ATOM     59  C   CYT    20       0.832   8.717  64.088  1.00  1.00      DNAx
+ATOM     60  C   CYT    20      -5.192  -0.247  63.995  1.00  1.00      DNAx
+CONECT    1    2
+CONECT    1    3
+CONECT    2    3
+CONECT    4    5
+CONECT    4    6
+CONECT    5    6
+CONECT    7    8
+CONECT    7    9
+CONECT    8    9
+CONECT   10   11
+CONECT   10   12
+CONECT   11   12
+CONECT   13   14
+CONECT   13   15
+CONECT   14   15
+CONECT   16   17
+CONECT   16   18
+CONECT   17   18
+CONECT   19   20
+CONECT   19   21
+CONECT   20   21
+CONECT   22   23
+CONECT   22   24
+CONECT   23   24
+CONECT   25   26
+CONECT   25   27
+CONECT   26   27
+CONECT   28   29
+CONECT   28   30
+CONECT   29   30
+CONECT   31   32
+CONECT   31   33
+CONECT   32   33
+CONECT   34   35
+CONECT   34   36
+CONECT   35   36
+CONECT   37   38
+CONECT   37   39
+CONECT   38   39
+CONECT   40   41
+CONECT   40   42
+CONECT   41   42
+CONECT   43   44
+CONECT   43   45
+CONECT   44   45
+CONECT   46   47
+CONECT   46   48
+CONECT   47   48
+CONECT   49   50
+CONECT   49   51
+CONECT   50   51
+CONECT   52   53
+CONECT   52   54
+CONECT   53   54
+CONECT   55   56
+CONECT   55   57
+CONECT   56   57
+CONECT   58   59
+CONECT   58   60
+CONECT   59   60
+CONECT    2    5
+CONECT    3    6
+CONECT    2    6
+CONECT    3    5
+CONECT    1    5
+CONECT    1    6
+CONECT    1    4
+CONECT    2    4
+CONECT    3    4
+CONECT    5    8
+CONECT    6    9
+CONECT    5    9
+CONECT    6    8
+CONECT    4    8
+CONECT    4    9
+CONECT    4    7
+CONECT    5    7
+CONECT    6    7
+CONECT    8   11
+CONECT    9   12
+CONECT    8   12
+CONECT    9   11
+CONECT    7   11
+CONECT    7   12
+CONECT    7   10
+CONECT    8   10
+CONECT    9   10
+CONECT   11   14
+CONECT   12   15
+CONECT   11   15
+CONECT   12   14
+CONECT   10   14
+CONECT   10   15
+CONECT   10   13
+CONECT   11   13
+CONECT   12   13
+CONECT   14   17
+CONECT   15   18
+CONECT   14   18
+CONECT   15   17
+CONECT   13   17
+CONECT   13   18
+CONECT   13   16
+CONECT   14   16
+CONECT   15   16
+CONECT   17   20
+CONECT   18   21
+CONECT   17   21
+CONECT   18   20
+CONECT   16   20
+CONECT   16   21
+CONECT   16   19
+CONECT   17   19
+CONECT   18   19
+CONECT   20   23
+CONECT   21   24
+CONECT   20   24
+CONECT   21   23
+CONECT   19   23
+CONECT   19   24
+CONECT   19   22
+CONECT   20   22
+CONECT   21   22
+CONECT   23   26
+CONECT   24   27
+CONECT   23   27
+CONECT   24   26
+CONECT   22   26
+CONECT   22   27
+CONECT   22   25
+CONECT   23   25
+CONECT   24   25
+CONECT   26   29
+CONECT   27   30
+CONECT   26   30
+CONECT   27   29
+CONECT   25   29
+CONECT   25   30
+CONECT   25   28
+CONECT   26   28
+CONECT   27   28
+CONECT   29   32
+CONECT   30   33
+CONECT   29   33
+CONECT   30   32
+CONECT   28   32
+CONECT   28   33
+CONECT   28   31
+CONECT   29   31
+CONECT   30   31
+CONECT   32   35
+CONECT   33   36
+CONECT   32   36
+CONECT   33   35
+CONECT   31   35
+CONECT   31   36
+CONECT   31   34
+CONECT   32   34
+CONECT   33   34
+CONECT   35   38
+CONECT   36   39
+CONECT   35   39
+CONECT   36   38
+CONECT   34   38
+CONECT   34   39
+CONECT   34   37
+CONECT   35   37
+CONECT   36   37
+CONECT   38   41
+CONECT   39   42
+CONECT   38   42
+CONECT   39   41
+CONECT   37   41
+CONECT   37   42
+CONECT   37   40
+CONECT   38   40
+CONECT   39   40
+CONECT   41   44
+CONECT   42   45
+CONECT   41   45
+CONECT   42   44
+CONECT   40   44
+CONECT   40   45
+CONECT   40   43
+CONECT   41   43
+CONECT   42   43
+CONECT   44   47
+CONECT   45   48
+CONECT   44   48
+CONECT   45   47
+CONECT   43   47
+CONECT   43   48
+CONECT   43   46
+CONECT   44   46
+CONECT   45   46
+CONECT   47   50
+CONECT   48   51
+CONECT   47   51
+CONECT   48   50
+CONECT   46   50
+CONECT   46   51
+CONECT   46   49
+CONECT   47   49
+CONECT   48   49
+CONECT   50   53
+CONECT   51   54
+CONECT   50   54
+CONECT   51   53
+CONECT   49   53
+CONECT   49   54
+CONECT   49   52
+CONECT   50   52
+CONECT   51   52
+CONECT   53   56
+CONECT   54   57
+CONECT   53   57
+CONECT   54   56
+CONECT   52   56
+CONECT   52   57
+CONECT   52   55
+CONECT   53   55
+CONECT   54   55
+CONECT   56   59
+CONECT   57   60
+CONECT   56   60
+CONECT   57   59
+CONECT   55   59
+CONECT   55   60
+CONECT   55   58
+CONECT   56   58
+CONECT   57   58
