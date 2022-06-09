@@ -1,8 +1,53 @@
 import numpy as np
-from utils_peldor import rigid_transform_3D, labels_dist
+from utils_peldor import labels_dist
 from utils import pdb_line
 import copy
 #import os
+
+def rigid_transform_3D(A, B):
+    # Input: expects 3xN matrix of points
+    # B = R@A + t
+    # Returns R,t
+    # R = 3x3 rotation matrix
+    # t = 3x1 column vector
+
+    assert A.shape == B.shape
+
+    num_rows, num_cols = A.shape
+    if num_rows != 3:
+        raise Exception(f"matrix A is not 3xN, it is {num_rows}x{num_cols}")
+
+    num_rows, num_cols = B.shape
+    if num_rows != 3:
+        raise Exception(f"matrix B is not 3xN, it is {num_rows}x{num_cols}")
+
+    # find mean column wise
+    centroid_A = np.mean(A, axis=1)
+    centroid_B = np.mean(B, axis=1)
+
+    # ensure centroids are 3x1
+    centroid_A = centroid_A.reshape(-1, 1)
+    centroid_B = centroid_B.reshape(-1, 1)
+
+    # subtract mean
+    Am = A - centroid_A
+    Bm = B - centroid_B
+
+    H = Am @ np.transpose(Bm)
+
+    # find rotation
+    U, S, Vt = np.linalg.svd(H)
+    R = Vt.T @ U.T
+
+    # special reflection case
+    if np.linalg.det(R) < 0:
+        #print("det(R) < R, reflection detected!, correcting for it ...")
+        Vt[2,:] *= -1
+        R = Vt.T @ U.T
+
+    t = -R @ centroid_A + centroid_B
+
+    return R, t
 
 
 def nodes2cos(pair1, point1, pair2, point2, xyz_nodes):
@@ -12,77 +57,53 @@ def nodes2cos(pair1, point1, pair2, point2, xyz_nodes):
     return dx*norm, dy*norm, dz*norm
 
 
-def read_nodes(inp_file):
-
-    """
-    Inp: 
-        atom:       name of atom to serve as a node
-        inp_file:   name of pdb file containing the molecular structure
-        out_file:   name of pdb file to store the nodes
-
-    Out:
-        xyz_nodes:  a dictionary of the xyz coordinates of the nodes
-                    key: CA #, value: list of [x,y,z]
-    """
-
-    # go over the input pdb file and collect the node atoms
-
-    inp = open(inp_file + '.pdb')
-    xyz_nodes = []
-    for line in inp:
-        if (line[0:4] == 'ATOM'):
-            xyz_nodes.append([float(line[30:38]),float(line[38:46]),float(line[46:54])])
-    inp.close()
-    return np.array(xyz_nodes)
-
-
-def make_links_helix(n_pairs, n_points, pdb):
+def make_links_helix(n_pairs, n_points):
 
     links = {} # [node1, node2, spring constant]
 
     #1) same pair
     for i in range(n_pairs):
-        links[len(links)] = [(i,0), (i,1), 0.1]
+        #backbone
+        links[len(links)] = [(i,0), (i,1), 1.0]
+        #center
         links[len(links)] = [(i,0), (i,2), 0.1]
-        links[len(links)] = [(i,1), (i,2), 1.0]
+        links[len(links)] = [(i,1), (i,2), 0.1]
+        
     
     #2) next pair
     for i in range(n_pairs-1):
         j = i+1
         # backbone
+        links[len(links)] = [(i,0), (j,0), 1.]
         links[len(links)] = [(i,1), (j,1), 1.]
-        links[len(links)] = [(i,2), (j,2), 1.]
-        links[len(links)] = [(i,1), (j,2), 1.]
-        links[len(links)] = [(i,2), (j,1), 1.]
+        links[len(links)] = [(i,0), (j,1), 1.]
+        links[len(links)] = [(i,1), (j,0), 1.]
         # center   
-        links[len(links)] = [(i,0), (j,1), 0.1]
+        #links[len(links)] = [(i,2), (j,2), 0.1]
         links[len(links)] = [(i,0), (j,2), 0.1]
-        links[len(links)] = [(i,0), (j,0), 0.1]
-        links[len(links)] = [(i,1), (j,0), 0.1]
+        links[len(links)] = [(i,1), (j,2), 0.1]
         links[len(links)] = [(i,2), (j,0), 0.1]
+        links[len(links)] = [(i,2), (j,1), 0.1]
         #3) two pairs down
     for i in range(n_pairs-2):
         j = i+2
         # backbone only
-        #links[len(links)] = [n1+1,n1+7, 1.]
-        #links[len(links)] = [n1+2,n1+8, 1.]
-        #links[len(links)] = [n1+2,n1+7, 1.]
-        #links[len(links)] = [n1+1,n1+8, 1.]    
-
-    # write links to the end of nodes.pdb
-    if pdb:
-        out = open('pdbs/' + pdb + '_nodes.pdb','a')
-        for lk in links:
-            #print(links[lk][0]+1)
-            i = n_points*links[lk][0][0] + links[lk][0][1]
-            j = n_points*links[lk][1][0] + links[lk][1][1]
-            out.write('CONECT %4i %4i\n' %(i+1,j+1))
-        out.close()
+        # backbone
+        links[len(links)] = [(i,0), (j,0), 1.]
+        links[len(links)] = [(i,1), (j,1), 1.]
+        #links[len(links)] = [(i,0), (j,1), 1.]
+        #links[len(links)] = [(i,1), (j,0), 1.] 
+    #4) three pairs down
+    #for i in range(n_pairs-3):
+    #    j = i+3
+        # backbone
+        #links[len(links)] = [(i,0), (j,0), 1.]
+        #links[len(links)] = [(i,1), (j,1), 1.]  
     
     return links
 
 
-def  make_ANM_matrix(links, xyz_nodes):
+def make_ANM_matrix(links, xyz_nodes):
     n_links = len(links)
     print("number of links:",n_links)
 
@@ -119,14 +140,12 @@ def  make_ANM_matrix(links, xyz_nodes):
     ))
 
 
-def ANM_analysis(helix, n_low=3, pdb=None, verbose=True):
+def ANM_analysis(helix, n_low=3, verbose=True):
 
     xyz_nodes = helix.nodes
     n_pairs, n_points, _ = xyz_nodes.shape
 
-    if pdb:
-        helix.write_nodes_pdb(pdb)
-    links = make_links_helix(n_pairs, n_points, pdb)
+    links = make_links_helix(n_pairs, n_points)
     A     = make_ANM_matrix(links, xyz_nodes)
 
     rank = np.linalg.matrix_rank(A)
@@ -142,132 +161,128 @@ def ANM_analysis(helix, n_low=3, pdb=None, verbose=True):
 
         print("\nlowest 6 eigenvalues: (should be zeros)")
         print(eVals[:6])
-        print(f"next {n_low} eigenvalues: (should be real)")
+        print(f"\nnext {n_low} eigenvalues: (should be real)")
         print(eVals[6:6+n_low])
     
+    #restrict to lowest, non-zero frequency modes
     skip = 6 #these are the 6 translation and rotation modes
-    #skip = 0
-    eVals_low = eVals[skip:skip+n_low]
-    eVecs_low = eVecs[:,skip:skip+n_low]
+    eVals = eVals[skip:skip+n_low]
+    eVecs = eVecs[:,skip:skip+n_low]
 
     # take real parts if all imaginary parts are zero
-    if not np.any(np.iscomplex(eVals_low)):
-        eVals_low = eVals_low.real
-    if not np.any(np.iscomplex(eVecs_low)):
-        eVecs_low = eVecs_low.real
+    if not np.any(np.iscomplex(eVals)):
+        eVals = eVals.real
+    if not np.any(np.iscomplex(eVecs)):
+        eVecs = eVecs.real
 
     if verbose:
         np.set_printoptions(precision=6,suppress=True)
 
         print("  eVals       ratio    amplitude of oscillation")
-        for ev in eVals_low:
-            print(f"{ev:10.6f} {ev/eVals_low[0]:7.2f} {np.sqrt(eVals_low[0])/np.sqrt(ev):9.3f}")
+        for ev in eVals:
+            print(f"{ev:10.6f} {ev/eVals[0]:7.2f} {np.sqrt(eVals[0])/np.sqrt(ev):9.3f}")
 
         print("\ncheck orthogonality of the eigenvectors that belong to above eigenvalues:")
-        print(eVecs_low.T @ eVecs_low)
-    #print(f"reshape lowest {n_low} eigenvectors from {eVecs_low.shape}")
-    eVecs_tmp = eVecs_low.T.reshape(n_low,3,n_pairs,-1)
-    eVecs_low = np.transpose(eVecs_tmp,(0,2,3,1))
-    #print(f"to {eVecs_low.shape}")
-
-    form = lambda x: "%8.3f" % x
-    scale = 2.
-   
-    for l in range(n_low):
-
-        """
-        scale = 0.2
-        if (abs(ev) > 1e-6):
-            scale = 0.02/np.sqrt(ev)
-        #find maximum
-        id_max = np.argmax(np.abs(eVecs_low[:,l]))
-        max_sign = np.sign(eVecs_low[:,l][id_max])
-
-        vx = eVecs_low[0*n_nodes:1*n_nodes,l]*max_sign
-        vy = eVecs_low[1*n_nodes:2*n_nodes,l]*max_sign
-        vz = eVecs_low[2*n_nodes:3*n_nodes,l]*max_sign
-
-        
-        #jv = Bx.T@vx + By.T@vy  + Bz.T@vz
-        #maxjv = max(abs(jv))
-        ##jv = abs(jv)/maxjv
-
-        #if l == 0:
-        #for nl in range(n_links):
-        #    #if (jv[nl] > 0.99):    print(l,":",links[nl],jv[nl])
-        #    if (jv[nl] < 0.001):    print(l,":",links[nl],jv[nl])
-        """
-        
-        '''
-        # write to anm.pdb file
-        if pdb:
-            out = open('pdbs/anm'+str(l+1)+'.pdb','w')
-            # create 21 models
-            models = 11
-            low = (models-1)//2
-            for md in range(models):
-                #if md > 0:  out.write("ENDMDL\n")
-                out.write("MODEL" + f"{str(md+1):>9s}\n")
-
-                #inp = open('gnm.pdb')
-                inp = open('pdbs/nodes.pdb')
-                for line in inp:
-                    if (line[0:4] == 'ATOM'):
-                        words = line.split()
-                        pair = int(words[4])-1
-                        num = int(words[1])-1
-                        point = num - (n_points*pair)
-                        x_ref,y_ref,z_ref = float(line[30:38]),float(line[38:46]),float(line[46:54])
-                        x = x_ref + (md-low)*scale*eVecs_low[l][pair][point][0]
-                        y = y_ref + (md-low)*scale*eVecs_low[l][pair][point][1]
-                        z = z_ref + (md-low)*scale*eVecs_low[l][pair][point][2]
-                        new = line[:30] + form(x) + form(y) + form(z) + line[54:]
-                        out.write(new)
-                    else:
-                        out.write(line)
-                out.write("END\n")
-                inp.close()
-            out.close()
-            '''
-        
-    return eVals_low, eVecs_low
-
-
-def write_pdb_modes(file, helix, eVecs, eVals, n_models=11, scale = 10.):
+        print(eVecs.T @ eVecs)
     
+    print(f"reshape lowest {n_low} eigenvectors from {eVecs.shape}")
+    eVecs_tmp = eVecs.T.reshape(n_low,3,n_pairs,n_points)
+    print(f"to {eVecs_tmp.shape}")
+
+    eVecs = np.transpose(eVecs_tmp,(0,2,3,1))
+    print(f"and to {eVecs.shape}")
+    #print(xyz_nodes.shape)
+
+    return eVals, eVecs, links
+
+
+def write_pdb_nodes(helix, links, eVecs, eVals, pdb, n_models=11, scale = 0.01):
+
     n_modes, n_pairs, n_points, _ = eVecs.shape
+
+    helix.write_nodes_pdb(pdb)
+    # write links to the end of _nodes.pdb
+    out = open('pdbs/' + pdb + '_nodes.pdb','a')
+    for lk in links:
+        #print(links[lk][0]+1)
+        i = n_points*links[lk][0][0] + links[lk][0][1]
+        j = n_points*links[lk][1][0] + links[lk][1][1]
+        out.write('CONECT %4i %4i\n' %(i+1,j+1))
+    out.close()
+    
     s = np.linspace(-1,1,n_models)
 
-    NN_all = []
-    OO_all = []
-    NO_all = []
-    ON_all = []
+    amplitudes = 1./np.sqrt(eVals)
 
     #go over modes
     for l in range(n_modes):
-        ampl = 1./np.sqrt(eVals[l])
+           
+        s = np.linspace(-1,1,n_models)
 
-        NN_model = []
-        OO_model = []
-        NO_model = []
-        ON_model = []
-
-        vec_mode = eVecs[l]
-        #print(vec_mode.shape)
-        out = open('pdbs/' + file + '_mode' + str(l+1)+'.pdb','w')
+        out = open('pdbs/' + pdb + '_nodes' + str(l+1)+'.pdb','w')
 
         # create models
         for md in range(n_models):
-
-
+            
             out.write("MODEL" + f"{str(md+1):>9s}\n")
 
             helix_copy = copy.deepcopy(helix)
             #go over pairs in helix
             for i,pair in enumerate(helix.pairs):
                 A = helix.nodes[i]
+                B = A + amplitudes[l]*scale*s[md]*eVecs[l][i]
+                helix_copy.nodes[i] = B
+                R, t = rigid_transform_3D(A.T, B.T)
+                #print(i,R,t)
+                #transform coordinates of pair in the  copy
+                helix_copy.pairs[i].bases[0].xyz = helix.pairs[i].bases[0].xyz@R.T + t.T
+                helix_copy.pairs[i].bases[1].xyz = helix.pairs[i].bases[1].xyz@R.T + t.T
+            
+            #write to pdb file
+            types = ['X','X','S']
+            atom, resid = 1, 1
+            #go over strand I
+            for j in range(n_pairs):
+                name = helix_copy.pairs[j].bases[0].name
+                for i in range(n_points):
+                    line = f"ATOM{atom:>7} {types[i]:^4} {name:>3}   {resid:>3} " \
+                    + f"{helix_copy.nodes[j][i][0]:11.3f}{helix_copy.nodes[j][i][1]:8.3f}{helix_copy.nodes[j][i][2]:8.3f}" \
+                    + f"  1.00  1.00      {'DNAx':>4}\n"
+                    out.write(line)
+                    atom += 1
+                resid += 1
+            for lk in links:
+                #print(links[lk][0]+1)
+                i = n_points*links[lk][0][0] + links[lk][0][1]
+                j = n_points*links[lk][1][0] + links[lk][1][1]
+                out.write('CONECT %4i %4i\n' %(i+1,j+1))
+            out.write("END\n")
+
+
+
+def write_pdb_modes(helix, eVecs, eVals, pdb, n_models=11, scale = 0.01):
+    
+    n_modes, n_pairs, n_points, _ = eVecs.shape
+    s = np.linspace(-1,1,n_models)
+
+    amplitudes = 1./np.sqrt(eVals)
+    #go over modes
+    for l in range(n_modes):
+       
+        out = open('pdbs/' + pdb + '_mode' + str(l+1)+'.pdb','w')
+
+        # create models
+        for md in range(n_models):
+            
+            if pdb:
+                out.write("MODEL" + f"{str(md+1):>9s}\n")
+
+            helix_copy = copy.deepcopy(helix)
+            #go over pairs in helix
+            for i,pair in enumerate(helix.pairs):
+                A = helix.nodes[i]
                 #print(A.shape)
-                B = A + ampl*scale*s[md]*vec_mode[i]
+                B = A + amplitudes[l]*scale*s[md]*eVecs[l][i]
                 #print(B.shape)
                 R, t = rigid_transform_3D(A.T, B.T)
                 #print(i,R,t)
@@ -275,58 +290,149 @@ def write_pdb_modes(file, helix, eVecs, eVals, n_models=11, scale = 10.):
                 helix_copy.pairs[i].bases[0].xyz = helix.pairs[i].bases[0].xyz@R.T + t.T
                 helix_copy.pairs[i].bases[1].xyz = helix.pairs[i].bases[1].xyz@R.T + t.T
             
-            NN, OO, NO, ON, idx = labels_dist(helix_copy)
-            NN_model.append(NN)
-            OO_model.append(OO)
-            NO_model.append(NO)
-            ON_model.append(ON)
+            #NN, OO, NO, ON, idx = labels_dist(helix_copy)
+            #NN_model.append(NN)
+            #OO_model.append(OO)
+            #NO_model.append(NO)
+            #ON_model.append(ON)
 
             #write to pdb file
-            atom, resid = 1, 1
-            #go over strand I
-            for pair in helix_copy.pairs:
-                base = pair.bases[0]
-                for i in range(2,len(base.atoms)):
-                    line = pdb_line(atom, resid, base, i, segname='DNA1')
-                    out.write(line)
-                    atom += 1
-                resid += 1
-            resid = 1
-            #go over strand II
-            for pair in reversed(helix_copy.pairs):
-                base = pair.bases[1]
-                for i in range(2,len(base.atoms)):
-                    line = pdb_line(atom, resid, base, i, segname='DNA2')
-                    out.write(line)
-                    atom += 1
-                resid += 1
-            out.write("END\n")
+            if pdb:
+                atom, resid = 1, 1
+                #go over strand I
+                for pair in helix_copy.pairs:
+                    base = pair.bases[0]
+                    for i in range(0,len(base.atoms)):
+                        line = pdb_line(atom, resid, base, i, segname='DNA1')
+                        out.write(line)
+                        atom += 1
+                    resid += 1
+                resid = 1
+                #go over strand II
+                for pair in reversed(helix_copy.pairs):
+                    base = pair.bases[1]
+                    for i in range(0,len(base.atoms)):
+                        line = pdb_line(atom, resid, base, i, segname='DNA2')
+                        out.write(line)
+                        atom += 1
+                    resid += 1
+                out.write("END\n")
 
-        NN_all.append(NN_model)
-        OO_all.append(OO_model)
-        NO_all.append(NO_model)
-        ON_all.append(ON_model)
+        if pdb:
+            out.close()
 
-        out.close()
+        #NN_all.append(NN_model)
+        #OO_all.append(OO_model)
+        #NO_all.append(NO_model)
+        #ON_all.append(ON_model)
 
-    return np.array(NN_all), np.array(OO_all), np.array(NO_all), np.array(ON_all), np.array(idx)
+    #return np.array(NN_all), np.array(OO_all), np.array(NO_all), np.array(ON_all), np.array(idx)
     
 
+def generate_ensemble(helix, eVecs, eVals, mask, n_samples=10, scale = 0.01):
 
-###################
-# MAIN 
-#######################
-'''
-pdb_nodes = 'pdbs/nodes'
-pdb_gnm   = 'pdbs/gnm'
-pdb_anm   = 'pdbs/anm'
+    n_modes, n_pairs, n_points, _ = eVecs.shape
+
+    amplitudes = scale/np.sqrt(eVals) * np.random.normal(size=(n_samples,n_modes))
+    masked_ampl = np.einsum('ij,j->ij',amplitudes, np.array(mask))
+    #print(masked_ampl)
+
+    NN_all = []
+    OO_all = []
+    NO_all = []
+    ON_all = []
+
+    # create models
+    for sample in range(n_samples):
+
+        eVecs_scaled = np.einsum('i,ijkl->jkl',masked_ampl[sample],eVecs)
+        #print(eVecs_scaled.shape)
+
+        helix_copy = copy.deepcopy(helix)
+        #go over pairs in helix
+        for i,pair in enumerate(helix.pairs):
+            A = helix.nodes[i]
+            #print(A.shape)
+            B = A + eVecs_scaled[i]
+            #print(B.shape)
+            R, t = rigid_transform_3D(A.T, B.T)
+            #print(i,R,t)
+            #transform coordinates of pair in the  copy
+            helix_copy.pairs[i].bases[0].xyz = helix.pairs[i].bases[0].xyz@R.T + t.T
+            helix_copy.pairs[i].bases[1].xyz = helix.pairs[i].bases[1].xyz@R.T + t.T
+
+        
+        NN, OO, NO, ON, idx = labels_dist(helix_copy)
+
+        NN_all.append(NN)
+        OO_all.append(OO)
+        NO_all.append(NO)
+        ON_all.append(ON)
+
+    return np.array(NN_all), np.array(OO_all), np.array(NO_all), np.array(ON_all), np.array(idx)
+
+##################
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from scipy.stats import norm
 
 
-xyz_nodes = read_nodes('pdbs/3points')
+def plot_histograms(dist_all, idx_all, exp_data, xlim, ylim, show=False):
 
-os.system("cp pdbs/3points.pdb pdbs/nodes.pdb");
-#print("xyz:",xyz_nodes)
+    #the experimental data
+    exp_id,exp_dist,exp_Dr = exp_data
 
-ANM_analysis(xyz_nodes, n_low=6, pdb=True)
+    df_dist = pd.DataFrame(
+        data = dist_all,
+        columns = idx_all
+    )
+    #sort columns
+    cols = df_dist.columns.tolist()
+    cols = [int(x) for x in cols]
+    cols.sort()
+    df_dist = df_dist[cols]
 
-'''
+    #fit normal distribution to columns of the dataframe
+    mu_all = []
+    std_all = []
+
+    for col in df_dist: 
+        mu, std = norm.fit(df_dist[col])
+        mu_all.append(mu)
+        std_all.append(std)
+
+    #plot
+    sns.set(style="white")
+
+    f, ax = plt.subplots(1,1,figsize=(12,8))
+
+    b = sns.histplot(data=df_dist, element="poly", binwidth=.33, kde=True, stat='density')
+    b.set_xlabel("Distance [A]",fontsize=16)
+    b.set_ylabel("Density",fontsize=16)
+
+    x_min = exp_dist[0] - exp_Dr[0]
+    x_max = exp_dist[-1] + exp_Dr[-1]
+
+    x_plot = np.linspace(x_min,x_max,300)
+
+    plt.xlim(xlim)
+    plt.ylim(ylim)
+
+
+    for i,xd in enumerate(exp_dist):
+        
+        if show:
+            # Plot the PDF.
+            #p = norm.pdf(x_plot, mu_all[i], std_all[i])
+            #plt.plot(x_plot, 0.1*p, 'k', linewidth=1)
+            
+            sig = exp_Dr[i]/2.355
+            y_gauss = np.exp(-((x_plot-xd)/sig)**2/2)/(sig*np.sqrt(2*np.pi))
+            if i%2 == 0:
+                plt.plot(x_plot,(0.2)*y_gauss,color='red',linestyle=':')
+            else:
+                plt.plot(x_plot,(0.2)*y_gauss,color='blue',linestyle=':')
+            
+        
+        plt.axvline(x=xd, color='gray', linestyle='--')

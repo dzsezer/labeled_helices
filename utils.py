@@ -1,6 +1,7 @@
 import numpy as np
-import param_bases as parbase
-import param_pairs as parpair
+import copy
+import param_bases as parambase
+import param_pairs as parampair
 
 
 #############
@@ -62,11 +63,11 @@ class Base:
         self.name = letters[name]
         if name == 'c':
             label_name = f"C{label}"
-            self.atoms = list(parbase.Coor_labels[label_name].keys())
-            self.xyz = np.array(list(parbase.Coor_labels[label_name].values()))
+            self.atoms = list(parambase.Coor_labels[label_name].keys())
+            self.xyz = np.array(list(parambase.Coor_labels[label_name].values()))
         else:
-            self.atoms = list(parbase.Coor_bases[name].keys())
-            self.xyz = np.array(list(parbase.Coor_bases[name].values()))
+            self.atoms = list(parambase.Coor_bases[name].keys())
+            self.xyz = np.array(list(parambase.Coor_bases[name].values()))
         
         #flip base around x-axis if on strand II
         if strand == 'II':
@@ -109,12 +110,12 @@ class Pair:
         self.rg = np.zeros((1,3))
         # calculate (but DO NOT implement) local transformation 
         # of bases in the pair
-        omega = parpair.pair_geom[na_type]["Propeller"][b] 
-        sigma = parpair.pair_geom[na_type]["Opening"][b]
-        kappa = parpair.pair_geom[na_type]["Buckle"][b]
-        Sy    = parpair.pair_geom[na_type]["Stretch"][b]
-        Sz    = parpair.pair_geom[na_type]["Stagger"][b]
-        Sx    = parpair.pair_geom[na_type]["Shear"][b]
+        omega = parampair.pair_geom[na_type]["Propeller"][b] 
+        sigma = parampair.pair_geom[na_type]["Opening"][b]
+        kappa = parampair.pair_geom[na_type]["Buckle"][b]
+        Sy    = parampair.pair_geom[na_type]["Stretch"][b]
+        Sz    = parampair.pair_geom[na_type]["Stagger"][b]
+        Sx    = parampair.pair_geom[na_type]["Shear"][b]
         if omega == 0 and kappa == 0:
             gamma = 0.0
             phi_prime = 0.0
@@ -132,14 +133,14 @@ class Pair:
 
     def unflat(self):
         #UNDO the base pair step
-        self.bases[0].xyz[2:] = (self.bases[0].xyz[2:] - self.rg) @ self.Tg 
-        self.bases[1].xyz[2:] = (self.bases[1].xyz[2:] - self.rg) @ self.Tg 
+        self.bases[0].xyz = (self.bases[0].xyz - self.rg) @ self.Tg 
+        self.bases[1].xyz = (self.bases[1].xyz - self.rg) @ self.Tg 
         # UNFLAT the bases 
-        self.bases[0].xyz[2:] = self.bases[0].xyz[2:] @ self.T1.T + self.dr/2.
-        self.bases[1].xyz[2:] = self.bases[1].xyz[2:] @ self.T2.T - self.dr/2.
+        self.bases[0].xyz = self.bases[0].xyz @ self.T1.T + self.dr/2.
+        self.bases[1].xyz = self.bases[1].xyz @ self.T2.T - self.dr/2.
         #REDO the base pair step
-        self.bases[0].xyz[2:] = self.bases[0].xyz[2:] @ self.Tg.T + self.rg
-        self.bases[1].xyz[2:] = self.bases[1].xyz[2:] @ self.Tg.T + self.rg
+        self.bases[0].xyz = self.bases[0].xyz @ self.Tg.T + self.rg
+        self.bases[1].xyz = self.bases[1].xyz @ self.Tg.T + self.rg
 
 
     def stats(self):
@@ -185,14 +186,14 @@ def helix_axis(pair1, pair2):
     """
     # 1) Select equivalent atoms
     equivalent_atoms_i = np.vstack((
-        pair1.bases[0].xyz[0], #center
-        pair1.bases[0].xyz[1], pair1.bases[1].xyz[1], # C1'/C1'
-        pair1.bases[0].xyz[3], pair1.bases[1].xyz[3]  # RN9/YN1
+        #pair1.bases[0].xyz[0], #center
+        pair1.bases[0].xyz[0], pair1.bases[1].xyz[0], # C1'/C1'
+        pair1.bases[0].xyz[1], pair1.bases[1].xyz[1]  # RN9/YN1
     ))
     equivalent_atoms_ip1 = np.vstack((
-        pair2.bases[0].xyz[0], #center
-        pair2.bases[0].xyz[1], pair2.bases[1].xyz[1], #C1'/C1'
-        pair2.bases[0].xyz[3], pair2.bases[1].xyz[3]  # RN9/YN1
+        #pair2.bases[0].xyz[0], #center
+        pair2.bases[0].xyz[0], pair2.bases[1].xyz[0], #C1'/C1'
+        pair2.bases[0].xyz[1], pair2.bases[1].xyz[1]  # RN9/YN1
     ))
     #calculate vectors from one set of atoms to the other
     Del_i_ip1 = (equivalent_atoms_ip1 - equivalent_atoms_i)
@@ -240,12 +241,12 @@ def base_step(letter, pair1, form, label):
     b1 = label2index[pair1.bases[0].name[0]]
     b2 = label2index[pair2.bases[0].name[0]]
 
-    Omega = parpair.step_geometry[form]["Twist"][b1][b2]
-    rho   = parpair.step_geometry[form]["Roll"][b1][b2]
-    tau   = parpair.step_geometry[form]["Tilt"][b1][b2]
-    Dz    = parpair.step_geometry[form]["Rise"][b1][b2]
-    Dy    = parpair.step_geometry[form]["Slide"][b1][b2]
-    Dx    = parpair.step_geometry[form]["Shift"][b1][b2]
+    Omega = parampair.step_geometry[form]["Twist"][b1][b2]
+    rho   = parampair.step_geometry[form]["Roll"][b1][b2]
+    tau   = parampair.step_geometry[form]["Tilt"][b1][b2]
+    Dz    = parampair.step_geometry[form]["Rise"][b1][b2]
+    Dy    = parampair.step_geometry[form]["Slide"][b1][b2]
+    Dx    = parampair.step_geometry[form]["Shift"][b1][b2]
 
     if tau != 0 or rho != 0:
         Gamma = np.sqrt(rho**2 + tau**2)
@@ -290,7 +291,7 @@ class Helix():
         self.pairs   = []
         self.origins = []
         self.normals = []
-        nodes   = []
+        self.nodes   = []
 
         rises = []
 
@@ -300,8 +301,10 @@ class Helix():
         pair = Pair(sequence[0], na_type, label)
         self.pairs.append(pair)
         #collect nodes of flat pair
-        nodes.append([pair.bases[0].xyz[0], 
-            pair.bases[0].xyz[1], pair.bases[1].xyz[1]])
+        nodes = np.vstack((pair.bases[0].xyz[0], pair.bases[1].xyz[0], pair.rg.flatten()))
+        #nodes = np.vstack((pair.bases[0].xyz[0], pair.bases[1].xyz[0]))
+        #print(nodes)
+        self.nodes.append(nodes)
 
         #proceed with the rest of the sequence
         for letter in sequence[1:]:
@@ -309,8 +312,10 @@ class Helix():
             pair2, origin, normal, rise = base_step(letter, pair, form, label)
             rises.append(rise)
             #collect nodes of flat pair
-            nodes.append([pair2.bases[0].xyz[0], 
-                pair2.bases[0].xyz[1], pair2.bases[1].xyz[1]])
+            nodes = np.vstack((pair2.bases[0].xyz[0], pair2.bases[1].xyz[0], pair2.rg.flatten()))
+            #nodes = np.vstack((pair2.bases[0].xyz[0], pair2.bases[1].xyz[0]))
+            #print(nodes)
+            self.nodes.append(nodes)
             #as well as origin and normal calculated from flat pairs
             self.origins.append(origin)
             self.normals.append(normal)
@@ -318,11 +323,13 @@ class Helix():
             pair = pair2
             self.pairs.append(pair)
 
+        #print(self.nodes)
+        self.nodes = np.array(self.nodes)
         #pair.stats()
-        self.nodes = np.array(nodes)
-        #print("nodes shape:")
-        #print(self.nodes.shape)
-        if verbose:
+        if verbose:            
+            #print("nodes shape:", self.nodes.shape)
+            #print(self.nodes)
+
             rises = np.array(rises)
             np.set_printoptions(precision=6,suppress=True)
             print(rises)
@@ -347,7 +354,7 @@ class Helix():
         #go over strand I
         for pair in self.pairs:
             base = pair.bases[0]
-            for i in range(2,len(base.atoms)):
+            for i in range(0,len(base.atoms)):
                 line = pdb_line(atom, resid, base, i, segname='DNA1')
                 out.write(line)
                 atom += 1
@@ -356,7 +363,7 @@ class Helix():
         #go over strand II
         for pair in reversed(self.pairs):
             base = pair.bases[1]
-            for i in range(2,len(base.atoms)):
+            for i in range(0,len(base.atoms)):
                 line = pdb_line(atom, resid, base, i, segname='DNA2')
                 out.write(line)
                 atom += 1
@@ -369,11 +376,14 @@ class Helix():
         out = open(file_name,'w')
         atom, resid = 1, 1
         
-        for origin in self.origins:
-            line = f"ATOM{atom:>7} {'S':^4} {'GUA':>3}   {resid:>3} " \
+        for j,origin in enumerate(self.origins):
+            name = self.pairs[j].bases[0].name
+
+            line = f"ATOM{atom:>7} {'S':^4} {name:>3}   {resid:>3} " \
     + f"{origin[0]:11.3f}{origin[1]:8.3f}{origin[2]:8.3f}" \
     + f"  1.00  1.00      {'DNAx':>4}\n"
             out.write(line)
+
             atom += 1
             resid += 1
         for i in range(atom-2):
@@ -385,12 +395,17 @@ class Helix():
     def write_center_pdb(self, file='pdbs/center.pdb'):
         file_name = file
         out = open(file_name,'w')
+
         atom, resid = 1, 1
         #go over strand I
-        for pair in self.pairs:
-            base = pair.bases[0]
-            line = pdb_line(atom, resid, base, 0, segname='DNAc')
+        for j,node in enumerate(self.nodes):
+            name = self.pairs[j].bases[0].name
+
+            line = f"ATOM{atom:>7} {'X':^4} {name:>3}   {resid:>3} " \
+            + f"{node[2][0]:11.3f}{node[2][1]:8.3f}{node[2][2]:8.3f}" \
+            + f"  1.00  1.00      {'DNAx':>4}\n"
             out.write(line)
+
             atom += 1
             resid += 1
         for i in range(atom-2):
@@ -400,17 +415,21 @@ class Helix():
 
 
     def write_nodes_pdb(self, file='nodes'):
+
+        n_pairs, n_points, _ = self.nodes.shape
+
         file_name = 'pdbs/' + file + '_nodes.pdb'
         out = open(file_name,'w')
 
-        types = ['S','C','C']
+        types = ['X','X','S']
+
         atom, resid = 1, 1
         #go over strand I
-        for j,node in enumerate(self.nodes):
+        for j in range(n_pairs):
             name = self.pairs[j].bases[0].name
-            for i in range(3):
+            for i in range(n_points):
                 line = f"ATOM{atom:>7} {types[i]:^4} {name:>3}   {resid:>3} " \
-                + f"{node[i][0]:11.3f}{node[i][1]:8.3f}{node[i][2]:8.3f}" \
+                + f"{self.nodes[j][i][0]:11.3f}{self.nodes[j][i][1]:8.3f}{self.nodes[j][i][2]:8.3f}" \
                 + f"  1.00  1.00      {'DNAx':>4}\n"
                 out.write(line)
                 atom += 1
@@ -418,6 +437,56 @@ class Helix():
         out.close()
 
 
-    def write_models_pdb(self, vecs, vals):
-        return True
+def helix_along_z_pdb(helix):
+    #rotates the helix such that its helix axis is in the z direction
+
+    points = np.array(helix.origins)
+    #print(points.shape)
+
+    #cm = np.mean(points,axis=0)
+    #print(cm.shape)
+
+    #A) identify the "best" direction of the origins
+    #1) calculate 3x3 covariance matrix 
+    M = np.cov(points,rowvar=False)
+    #print(M.shape)
+    #2) solve eigenvalue problem
+    eVals, eVecs = np.linalg.eig(M)
+    #identify evector of the largest evalue
+    idx = eVals.argsort()
+    eVals = eVals[idx]
+    eVecs = eVecs[:,idx]
+    #print(eVals)
+    eVec = eVecs[:,-1]
+    #make sure it points along the positive z direction
+    if eVec[2] < 0:
+        eVec *= -1
+    print("       helix axis:",eVec)
+
+    #B) orient eVec along z
+    z = np.array([0,0,1])
+    #1) angle of rotation
+    theta = np.arccos(np.dot(eVec,z))
+    #2) axis of rotation
+    u = np.cross(eVec,z)
+    u /= np.linalg.norm(u)
+    print(" axis of rotation:",u)
+    print("angle of rotation:",theta*180./np.pi)
+    #3) Rotation matrix
+    W = np.array([
+        [0, -u[2], u[1]],
+        [u[2], 0, -u[0]],
+        [-u[1], u[0], 0]
+    ])
+    R = np.eye(3) + np.sin(theta)*W + 2*(np.sin(theta**2/2))*(W@W)
+    print("  rotation matrix:\n",R)
+
+    #rotate coordinates and write to pdb file
+    helix_copy = copy.deepcopy(helix)
+    #go over pairs in helix
+    for i,pair in enumerate(helix.pairs):
+        helix_copy.pairs[i].bases[0].xyz = helix.pairs[i].bases[0].xyz@R.T 
+        helix_copy.pairs[i].bases[1].xyz = helix.pairs[i].bases[1].xyz@R.T 
+    helix_copy.write_pdb()
+
 

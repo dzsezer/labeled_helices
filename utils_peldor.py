@@ -1,52 +1,10 @@
-import numpy as np
 import param_bases as parbase
 import param_pairs as parpair
 
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 
-def rigid_transform_3D(A, B):
-    # Input: expects 3xN matrix of points
-    # B = R@A + t
-    # Returns R,t
-    # R = 3x3 rotation matrix
-    # t = 3x1 column vector
-
-    assert A.shape == B.shape
-
-    num_rows, num_cols = A.shape
-    if num_rows != 3:
-        raise Exception(f"matrix A is not 3xN, it is {num_rows}x{num_cols}")
-
-    num_rows, num_cols = B.shape
-    if num_rows != 3:
-        raise Exception(f"matrix B is not 3xN, it is {num_rows}x{num_cols}")
-
-    # find mean column wise
-    centroid_A = np.mean(A, axis=1)
-    centroid_B = np.mean(B, axis=1)
-
-    # ensure centroids are 3x1
-    centroid_A = centroid_A.reshape(-1, 1)
-    centroid_B = centroid_B.reshape(-1, 1)
-
-    # subtract mean
-    Am = A - centroid_A
-    Bm = B - centroid_B
-
-    H = Am @ np.transpose(Bm)
-
-    # find rotation
-    U, S, Vt = np.linalg.svd(H)
-    R = Vt.T @ U.T
-
-    # special reflection case
-    if np.linalg.det(R) < 0:
-        #print("det(R) < R, reflection detected!, correcting for it ...")
-        Vt[2,:] *= -1
-        R = Vt.T @ U.T
-
-    t = -R @ centroid_A + centroid_B
-
-    return R, t
 
 #############
 # functions
@@ -117,6 +75,59 @@ def labels_dist(helix):
     return dist_NN, dist_OO, dist_NO, dist_ON, dist_idx
 
 
+def distances_evn_odd(helix_evn, helix_odd):
+    evn_NN, evn_OO, evn_NO, evn_ON, evn_id = labels_dist(helix_evn)
+    odd_NN, odd_OO, odd_NO, odd_ON, odd_id = labels_dist(helix_odd)
+    
+    NN = np.concatenate([evn_NN,odd_NN],axis=-1)
+    OO = np.concatenate([evn_OO,odd_OO],axis=-1)
+    NO = np.concatenate([evn_NO,odd_NO],axis=-1)
+    ON = np.concatenate([evn_ON,odd_ON],axis=-1)
+    idx = np.concatenate([evn_id,odd_id],axis=-1)
+    
+    return NN,OO,NO,ON,idx
+
+
+def plot_distances(helix_evn, helix_odd, exp_data, plot_title, error_bars=True):
+    
+    ax = plt.figure().gca()
+
+
+    #the experimental data
+    exp_id,exp_dist,exp_Dr = exp_data
+
+    if error_bars:
+        plt.errorbar(exp_id,exp_dist,exp_Dr,label="PELDOR",
+            linestyle='',marker='*',ms=10,color='k', lw=1, capsize=2, capthick=2)
+    else:
+        plt.plot(exp_id,exp_dist,'--*k',markersize=10,label="PELDOR")
+    
+    #the model data
+    NN,OO,NO,ON,idx = distances_evn_odd(helix_evn,helix_odd)
+
+    plt.plot(idx,NN,'bo',ms=8,label='N-N')
+    plt.plot(idx,OO,'ro',ms=8,label='O-O')
+    plt.plot(idx,NO,'co',ms=8,label='N-O')
+    plt.plot(idx,ON,'go',ms=8,label='O-N')
+
+    #plt.plot(exp_id_dna_2,exp_dist_dna_2,'^k', label='C-dot')
+    
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+    ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+
+
+    plt.xlabel("Base pair separation ($\Delta$)",fontsize=14)
+    plt.ylabel("Distance [A]",fontsize=14)
+    plt.title(plot_title)
+    #plt.ylim(15,55)
+    plt.legend(frameon=False,loc=2);
+
+##################
+#
+
+
+"""
+
 def get_nitroxide_CNCO(helix):
     # get N and O positions of label on first strand
     label_idx = []
@@ -133,6 +144,7 @@ def get_nitroxide_CNCO(helix):
 
     return label_idx, np.array(label_CNCO)
 
+
 def labels_orientation(helix):
     label_idx, label_CNCO = get_nitroxide_CNCO(helix)
     n_labels = len(label_idx)
@@ -145,6 +157,6 @@ def labels_orientation(helix):
         dist_idx.append( label_idx[i]-label_idx[0])
     return rotations, dist_idx
 
-
+"""
 
 
