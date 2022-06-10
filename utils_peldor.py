@@ -6,40 +6,6 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 
 
-#############
-# functions
-##############
-
-def Rx(deg):
-    rad = deg*np.pi/180.
-    cs = np.cos(rad)
-    sn = np.sin(rad)
-    return np.array([
-        [1., 0, 0],
-        [0, cs,-sn],
-        [0, sn, cs]
-    ])
-
-def Ry(deg):
-    rad = deg*np.pi/180.
-    cs = np.cos(rad)
-    sn = np.sin(rad)
-    return np.array([
-        [cs, 0, sn],
-        [0, 1., 0],
-        [-sn, 0, cs]
-    ])
-
-def Rz(deg):
-    rad = deg*np.pi/180.
-    cs = np.cos(rad)
-    sn = np.sin(rad)
-    return np.array([
-        [cs,-sn, 0],
-        [sn, cs, 0],
-        [0, 0, 1.]      
-    ])
-
 
 def get_nitroxide_NO(helix):
     # get N and O positions of label on first strand
