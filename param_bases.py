@@ -83,8 +83,9 @@ Coor_bases = {
     },
 }
 
+# SPIN LABELs
 Coor_labels = {
-    # SPIN LABEL
+    # Andriy Marko (2011) and Maximilian Gauger (unpublished) 
     "C1": {
         #"S"  : [0, 0, 0],
         "C1'": [-2.477,    5.402,    0.0],  # C1' 
@@ -114,7 +115,8 @@ Coor_labels = {
         #C6 has to be the last one 
         "C6" : [-0.023,    5.068,    0.0],  # C6 <- C strand I 
     },
-    "C2": {
+    # Halbmair et al. (2016)
+    "C3": {
         #"S"  : [0, 0, 0],
         "C1'": [-2.477,    5.402,    0.0],  # C1' 
         "N1" : [-1.285,    4.542,    0.0],  # N1
@@ -143,7 +145,8 @@ Coor_labels = {
         #C6 has to be the last one 
         "C6" : [-0.021,    5.115,    0.0],
     },
-    "C3": {
+    #Maximilian Gauger (unpublished) 
+    "C2": {
         #"S"  : [0, 0, 0],
         "C1'": [-2.477,    5.402,    0.0],  # C1' 
         "N1" : [-1.285,    4.542,    0.0],  # N1
