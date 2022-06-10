@@ -4,10 +4,9 @@
 # Atomic coordinates of bases from 
 # Olson et al JMB 313:229-237 (2001)
 
-# Spin label from 
+# Spin label C1 from 
 # Cekan and Sigurdsson JACS 131:18054 (2009)
-
-# Spin label coordinates from the second label in 3ot0.pdb
+# atomic coordinates from the second label in 3ot0.pdb
 
 Coor_bases = {
     "A": {
